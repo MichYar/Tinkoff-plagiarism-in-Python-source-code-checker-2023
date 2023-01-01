@@ -1,7 +1,7 @@
 import argparse
 import tokenize
 
-'''le levenstein diff between tokenized ver of codes
+'''le levenstein diff between tokenized ver of codes (comments ignored)
 
 0 - codes similar, many - codes unsimilar
 '''
@@ -29,8 +29,8 @@ def levenstein(a, b) -> int :
     return current_row[n]
 
 
-def token_check(a: str, b: str):
-    a_, b_ = [t.exact_type for t in tokenize.generate_tokens(a)], [t.exact_type for t in tokenize.generate_tokens(b)]
+def tokenCheck(a: str, b: str):
+    a_, b_ = [t.exact_type for t in tokenize.generate_tokens(a) if t.exact_type != 'COMMENT'], [t.exact_type for t in tokenize.generate_tokens(b) if t.exact_type != 'COMMENT']
     return levenstein(a_, b_)
 
 
