@@ -1,7 +1,8 @@
 import argparse
 import tokenize
+import io
 
-'''le levenstein diff between tokenized ver of codes (comments ignored)
+'''le levenstein diff between tokenized ver of codes (comments and docstrings ignored)
 
 0 - codes similar, many - codes unsimilar
 '''
@@ -12,7 +13,7 @@ parser.add_argument('indir', type=str, help='directory of codes')
 parser.add_argument('outdir', type=str, help='file to dump le estimation')
 args = parser.parse_args()
 
-def levenstein(a, b) -> int :
+def levenstein(a, b):
     n, m = len(a), len(b)
     if n > m:
         a, b = b, a
@@ -29,9 +30,22 @@ def levenstein(a, b) -> int :
     return current_row[n]
 
 
+def docstringRemoval(a): # must be a list of strings - token exact types
+    if a[0] == 'STRING' and a[1] in ['NL','NEWLINE']:
+        a = a[2:]
+    lst_deleter = []
+    for _ in range(1, len(a) - 1):
+        if a[_] == 'STRING' and (a[_ - 1] in ['NL','NEWLINE'] or a[_ + 1] in ['NL','NEWLINE']):
+            lst_deleter.append([_, _ + 1])
+    for _ in lst_deleter:
+        a = a[:_[0]] + a[_[1] + 1:]
+    return a
+    
+    
 def tokenCheck(a: str, b: str):
-    a_, b_ = [t.exact_type for t in tokenize.generate_tokens(a) if t.exact_type != 'COMMENT'], [t.exact_type for t in tokenize.generate_tokens(b) if t.exact_type != 'COMMENT']
-    return levenstein(a_, b_)
+    a_, b_ = docstringRemoval([tokenize.tok_name[t.exact_type] for t in tokenize.tokenize(io.BytesIO(a.encode('utf-8')).readline) if tokenize.tok_name[t.exact_type] != 'COMMENT']),\
+        docstringRemoval([tokenize.tok_name[t.exact_type] for t in tokenize.tokenize(io.BytesIO(b.encode('utf-8')).readline) if tokenize.tok_name[t.exact_type] != 'COMMENT'])
+    return levenstein(a_[1:], b_[1:])
 
 
 def interface():
@@ -43,7 +57,7 @@ def interface():
             x, y = _.split()
             with open(x, 'r') as x_, open(y,'r') as y_:
                 w, t = x_.read(), y_.read()
-                res = token_check(w, t)
+                res = tokenCheck(w, t)
                 lst.append(res)
     res_ = '\n'.join(map(str, res))
     with open(out_, 'w') as b:
