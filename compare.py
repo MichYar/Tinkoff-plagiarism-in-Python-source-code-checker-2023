@@ -1,6 +1,7 @@
 import argparse
+import tokenize
 
-'''le basic code similarity estimation: levenstein dist
+'''le levenstein diff between tokenized ver of codes
 
 0 - codes similar, many - codes unsimilar
 '''
@@ -11,7 +12,7 @@ parser.add_argument('indir', type=str, help='directory of codes')
 parser.add_argument('outdir', type=str, help='file to dump le estimation')
 args = parser.parse_args()
 
-def levenstein(a: str, b: str) -> int :
+def levenstein(a, b) -> int :
     n, m = len(a), len(b)
     if n > m:
         a, b = b, a
@@ -28,6 +29,9 @@ def levenstein(a: str, b: str) -> int :
     return current_row[n]
 
 
+def token_check(a: str, b: str):
+    a_, b_ = [t.exact_type for t in tokenize.generate_tokens(a)], [t.exact_type for t in tokenize.generate_tokens(b)]
+    return levenstein(a_, b_)
 
 
 def interface():
@@ -39,7 +43,7 @@ def interface():
             x, y = _.split()
             with open(x, 'r') as x_, open(y,'r') as y_:
                 w, t = x_.read(), y_.read()
-                res = levenstein(w, t)
+                res = token_check(w, t)
                 lst.append(res)
     res_ = '\n'.join(map(str, res))
     with open(out_, 'w') as b:
