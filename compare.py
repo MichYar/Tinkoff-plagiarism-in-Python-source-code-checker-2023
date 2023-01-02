@@ -2,9 +2,9 @@ import argparse
 import tokenize
 import io
 
-'''le levenstein diff between tokenized ver of codes (comments and docstrings ignored)
+'''le levenstein diff between tokenized ver of codes (comments and docstrings ignored, fraction scoring implemented)
 
-0 - codes similar, many - codes unsimilar
+1 - codes similar, 0 - codes unsimilar
 '''
 
 input, output = '', ''
@@ -27,7 +27,7 @@ def levenstein(a, b):
                 change += 1
             current_row[j] = min(add, delete, change)
 
-    return current_row[n]
+    return 1 - current_row[n] / max(len(a), len(b))
 
 
 def docstringRemoval(a): # must be a list of strings - token exact types
@@ -43,7 +43,8 @@ def docstringRemoval(a): # must be a list of strings - token exact types
     
     
 def tokenCheck(a: str, b: str):
-    a_, b_ = docstringRemoval([tokenize.tok_name[t.exact_type] for t in tokenize.tokenize(io.BytesIO(a.encode('utf-8')).readline) if tokenize.tok_name[t.exact_type] != 'COMMENT']),\
+    a_, b_ = \
+        docstringRemoval([tokenize.tok_name[t.exact_type] for t in tokenize.tokenize(io.BytesIO(a.encode('utf-8')).readline) if tokenize.tok_name[t.exact_type] != 'COMMENT']),\
         docstringRemoval([tokenize.tok_name[t.exact_type] for t in tokenize.tokenize(io.BytesIO(b.encode('utf-8')).readline) if tokenize.tok_name[t.exact_type] != 'COMMENT'])
     return levenstein(a_[1:], b_[1:])
 
