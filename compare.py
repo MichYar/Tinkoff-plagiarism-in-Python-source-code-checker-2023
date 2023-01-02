@@ -7,7 +7,6 @@ import io
 1 - codes similar, 0 - codes unsimilar
 '''
 
-input, output = '', ''
 parser = argparse.ArgumentParser(description='code similarity estimation')
 parser.add_argument('indir', type=str, help='directory of codes')
 parser.add_argument('outdir', type=str, help='file to dump le estimation')
@@ -51,6 +50,7 @@ def tokenCheck(a: str, b: str):
 
 def interface():
     in_, out_ = args.indir, args.outdir
+    #in_, out_ = 'input.txt', 'scores.txt'
     with open(in_, 'r') as a:
         lst = []
         q = a.read().split('\n')
@@ -60,7 +60,7 @@ def interface():
                 w, t = x_.read(), y_.read()
                 res = tokenCheck(w, t)
                 lst.append(res)
-    res_ = '\n'.join(map(str, res))
+    res_ = '\n'.join(map(str, lst))
     with open(out_, 'w') as b:
         b.write(res_)
 
